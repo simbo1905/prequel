@@ -8,6 +8,7 @@ scalaVersion := "2.10.0"
 
 // Runtime Dependencies
 libraryDependencies ++= Seq(
+    "com.netflix.rxjava" % "rxjava-scala" % "0.15.0",
     "commons-pool" % "commons-pool" % "1.5.5",
     "commons-dbcp" % "commons-dbcp" % "1.4",
     "commons-lang" % "commons-lang" % "2.6",

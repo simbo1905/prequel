@@ -1,3 +1,39 @@
+Prequel - SQL is enough - JavaRx Extension
+==========================================
+
+This is a version of Prequel 0.3.9 + rxjava-scala 0.15.0 which extends Prequel with a pimp package "net.noerd.preqeuel.rx" to run the jdbc work on a background threadpool. Access to the results is through an asynchronous rx.lang.scala.Observable from [RxJava](https://github.com/Netflix/RxJava/wiki)
+
+Give a vanilla Prequel database setup: 
+
+```scala
+import net.noerd.prequel.DatabaseConfig
+import net.noerd.prequel.SQLFormatterImplicits._
+import net.noerd.prequel.ResultSetRowImplicits._
+
+case class Bicycle( id: Long, brand: String, releaseDate: DateTime )
+
+val database = DatabaseConfig(
+    driver = "org.hsqldb.jdbc.JDBCDriver",
+    jdbcURL = "jdbc:hsqldb:mem:mymemdb"
+)
+```
+
+You can run jdbc queries on a background threadpool and see the output via an Observable:  
+
+```scala
+  val observable: Observable[Bicycle] = database.observable("select id, brand, release_date from bicycles", r => {
+    Bicycle( r, r, r )
+  })
+  
+  val subscription = observable.subscribe(b => {
+    // standard rx onNext callback running on a background thread
+  })
+```
+
+The background threads are a threadpool within DatabaseConfigObservable sized to match the DatabaseConfig db connection pool max size. 
+
+Below is the original readme. 
+
 Prequel - SQL is enough
 =======================
 

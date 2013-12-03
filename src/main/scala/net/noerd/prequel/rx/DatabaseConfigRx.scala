@@ -23,11 +23,8 @@ class DatabaseConfigObservable(val database: DatabaseConfig) {
       observer.onCompleted()
       BooleanSubscription {
         subscribed = false
-        observer.onCompleted()
-        println(s"subscribed set to false and completed called")
       }
     })
-    obs.observeOn(jdbcSchedular)
     obs.subscribeOn(jdbcSchedular)
   }
 

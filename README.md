@@ -33,6 +33,8 @@ You can run jdbc queries on a background threadpool and see the output via an Ob
 
 The background threads are a threadpool within DatabaseConfigObservable sized to match the DatabaseConfig db connection pool max size. 
 
+Known issue: Canceling the subscription will prevent any more callbacks but does not stop Prequel from completing its iteration over the result set. 
+
 Below is the original readme. 
 
 Prequel - SQL is enough

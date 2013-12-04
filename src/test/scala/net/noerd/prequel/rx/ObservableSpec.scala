@@ -15,6 +15,8 @@ import net.noerd.prequel.SQLFormatterImplicits._
 import net.noerd.prequel.TestDatabase
 import net.noerd.prequel.rx.DatabaseConfigRx._
 
+import _root_.rx.lang.scala.{ Observer, Observable, Scheduler, Subscription }
+
 class ObservableSpec extends FunSpec with ShouldMatchers with BeforeAndAfterEach {
 
   val database = TestDatabase.config
@@ -44,22 +46,31 @@ class ObservableSpec extends FunSpec with ShouldMatchers with BeforeAndAfterEach
   describe("observable extention method") {
 
     it("should allow you to query the database") {
-      val observable = database.observable("select id, name from observersspectable", r => {
+      val observable = database.observable("select id, name from observersspectable") { r =>
         val t: (Int, String) = (r, r)
         t
-      })
+      }
 
       observable.toBlockingObservable.toList should equal(List((242, "test1"), (23, "test2"), (42, "test3")))
+    }
+
+    it("should allow you to query the database with parameters") {
+      val observable = database.observable("select id, name from observersspectable where name = ?", "test1") { r =>
+        val t: (Int, String) = (r, r)
+        t
+      }
+
+      observable.toBlockingObservable.toList should equal(List((242, "test1")))
     }
 
     it("should allow the subscription to be cancelled") {
 
       val doUnsubscribeLatch = new CountDownLatch(1)
 
-      val observable = database.observable("select id, name from observersspectable", r => {
+      val observable = database.observable("select id, name from observersspectable") { r =>
         val t: (Int, String) = (r, r)
         t
-      })
+      }
 
       val result = new ListBuffer[(Int, String)]
       @volatile var completed = false
@@ -87,15 +98,16 @@ class ObservableSpec extends FunSpec with ShouldMatchers with BeforeAndAfterEach
       result.size should equal(1)
 
       result should equal(List((242, "test1")))
+
     }
 
     it("should not process any work on the thread which creates the observable") {
 
       var foregroundThreadName = Thread.currentThread().getName()
 
-      val observable = database.observable("select id, name from observersspectable", r => {
+      val observable = database.observable("select id, name from observersspectable") { r =>
         ObserverSpecData(r, r, Thread.currentThread().getName())
-      })
+      }
 
       val result = new ListBuffer[ObserverSpecData]
 

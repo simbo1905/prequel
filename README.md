@@ -1,9 +1,9 @@
 Prequel - JavaRx Extension
 ==========================
 
-This is a version of Prequel 0.3.9 + rxjava-scala 0.15.0 which extends Prequel with a pimp package "net.noerd.preqeuel.rx" to run the jdbc work on a background threadpool. Access to the results is through an asynchronous rx.lang.scala.Observable from [RxJava](https://github.com/Netflix/RxJava/wiki)
+This is a version of Prequel 0.3.9 + rxjava-scala 0.15.1 which extends Prequel with a pimp package "net.noerd.preqeuel.rx" to run the jdbc work on a background threadpool. Access to the results is through an asynchronous rx.lang.scala.Observable from [RxJava](https://github.com/Netflix/RxJava/wiki)
 
-Give a vanilla Prequel database setup: 
+Given a vanilla Prequel database setup: 
 
 ```scala
 import net.noerd.prequel.DatabaseConfig
@@ -27,13 +27,23 @@ You can run jdbc queries on a background threadpool and see the output via an Ob
   
   val subscription = observable.subscribe( (b: Bicycle) => {
     // standard rx onNext callback running on a background thread being pushed to from background threadpool
-    
+    // ride your bike on a future or send it to an actor to run it on another set of threads
   })
 ```
 
 The background threads are a threadpool within DatabaseConfigObservable sized to match the DatabaseConfig db connection pool max size. 
 
-Known issue: Canceling the subscription will prevent any more callbacks but does not stop Prequel from completing its iteration over the result set. 
+### Not supported
+
+ * Truly canceling the subscription (rather than ignoring the rest of the result set) 
+
+The current implementation gets Prequel to generate a Seq of results on a background thread then fires these out via an RxJava Observable.   
+ 
+Normal processing should not abort reading from a result set as its very expensive to get results; you should only query for as little or as much as you need if you have any concern about the efficiency of your code. 
+
+The current implementation is very light weight. Recursive subscriptions are the optional lecture in [Principles of Reactive Programming](https://class.coursera.org/reactive-001/assignment/index) and will kinda blow out the Prequel try/catch error handling model. 
+
+If you want an Iteratee rather than an Observable take a look at [Rxplay Making Iteratees And Observables Play Nice](http://bryangilbert.com/code/2013/10/22/rxPlay-making-iteratees-and-observables-play-nice/)
 
 Below is the original readme. 
 
@@ -41,8 +51,6 @@ Prequel - SQL is enough
 =======================
 
 There are a lot of database libraries out there. Most of them try to create a new abstraction on top of SQL. I think SQL is already a quite nice abstraction for working with data. Prequel aims to make working with this abstraction a bit more comfortable, nothing more.
-
-[![Build Status](https://secure.travis-ci.org/jpersson/prequel.png)](http://travis-ci.org/jpersson/prequel)
 
 ### Background
 

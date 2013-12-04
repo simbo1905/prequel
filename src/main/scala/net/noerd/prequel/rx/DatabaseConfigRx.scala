@@ -11,12 +11,12 @@ class DatabaseConfigObservable(val database: DatabaseConfig) {
   val threadPool = Executors.newFixedThreadPool(database.poolConfig.maxActive)
   val jdbcSchedular = Schedulers.executor(threadPool)
 
-  def observable[T](query: String, mapper: (ResultSetRow) => T) = {
+  def observable[T](sql: String, params: Formattable*)(block: ResultSetRow => T) = {
     @volatile var subscribed = true
     val obs = Observable((observer: Observer[T]) => {
       database.transaction { tx =>
-        tx.select(query) { row =>
-          if (subscribed) observer.onNext(mapper(row))
+        tx.select(sql, params: _*) { row =>
+          if (subscribed) observer.onNext(block(row))
           else throw new InterruptedException("rx observable is unsubscribed")
         }
       }

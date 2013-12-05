@@ -43,7 +43,7 @@ If you want an ```Iteratee``` rather than an ```Observable``` take a look at [Rx
 
 ### Not supported
 
- * Truly canceling the subscription (rather than ignoring the rest of the results which were loaded into the Seq) 
+ * Truly canceling the subscription (rather than ignoring the rest of the results which were loaded into a buffer synchronously) 
  * Observable insert/update/delete (its trivial to push updates on your own future which uses ```ExecutionContext.fromExecutor(database.jdbcThreadPool)``` see the unit tests)
 
 The current implementation gets Prequel to generate a ```Seq``` of results on a background thread then fires these out via an RxJava Observable.   

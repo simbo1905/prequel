@@ -50,7 +50,7 @@ The current implementation gets Prequel to generate a ```Seq``` of results on a 
 
 Its very expensive to get data into a ```ResultSet``` so normal processing should not abort reading as folks should only query for what they need. Likewise running an insert/update/delete then cancelling before you get confirmation of the effect isn't normal processing. Instead simply perform any writes on a future using the jdbcThreadPool with ```ExecutionContext.fromExecutor(database.jdbcThreadPool)```.
 
-The current implementation is a pimp wrapper so light touch to the main Prequel code. The recursive subscriptions are the optional lectures in [Principles of Reactive Programming](https://class.coursera.org/reactive-001/assignment/index) and will blow apart the Prequel synchronous try/catch error handling model (its very possible, but do you really need to cancel the work under normal processing?). 
+The current implementation is a pimp wrapper to the normal Prequel code. Recursive subscriptions which can be cancelled as we iterate over the rows are in the the optional lectures of the course [Principles of Reactive Programming](https://class.coursera.org/reactive-001/assignment/index). This would require a rewrite of the error Prequel synchronous try/finally closing of resources (so its possible, but do you really need to cancel the work under normal processing?). 
 
 Below is the original readme. 
 

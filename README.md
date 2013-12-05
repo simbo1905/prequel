@@ -48,7 +48,7 @@ If you want an ```Iteratee``` rather than an ```Observable``` take a look at [Rx
 
 The current implementation gets Prequel to generate a ```Seq``` of results on a background thread then fires these out via an RxJava Observable.   
 
-Its very expensive to get data into a ```ResultSet``` so normal processing should not abort reading as folks should only query for what they need. Likewise running an insert/update/delete then cancelling before you get confirmation of the effect isn't normal processing. Instead simply perform writes on a future running on the ```ExecutionContext.fromExecutor(database.jdbcThreadPool)```.
+Its very expensive to get data into a ```ResultSet``` so normal processing should not abort reading as folks should only query for what they need. Likewise running an insert/update/delete then cancelling before you get confirmation of the effect isn't normal processing. Instead simply perform any writes on a future using the jdbcThreadPool with ```ExecutionContext.fromExecutor(database.jdbcThreadPool)```.
 
 The current implementation is a pimp wrapper so light touch to the main Prequel code. The recursive subscriptions are the optional lectures in [Principles of Reactive Programming](https://class.coursera.org/reactive-001/assignment/index) and will blow apart the Prequel synchronous try/catch error handling model (its very possible, but do you really need to cancel the work under normal processing?). 
 

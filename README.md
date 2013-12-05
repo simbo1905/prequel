@@ -39,14 +39,15 @@ Don't forget to shutdown the background threadpool when you are done with:
   database.shutdown()
 ```
 
+The current implementation gets Prequel to generate a ```Seq``` of results on a background thread then fires these out via an RxJava Observable.   
+
 If you want an ```Iteratee``` rather than an ```Observable``` take a look at [Rxplay Making Iteratees And Observables Play Nice](http://bryangilbert.com/code/2013/10/22/rxPlay-making-iteratees-and-observables-play-nice/)
 
 ### Not supported
 
- * Truly canceling the subscription (rather than ignoring the rest of the results which were loaded into a buffer synchronously) 
+ * True cancel of the jdbc work happening on the background thread (instead its loaded into a buffer in one pass and unsusbscribing from the observer just cancels getting the data pushed to you from the buffer) 
  * Observable insert/update/delete (its trivial to push updates on your own future which uses ```ExecutionContext.fromExecutor(database.jdbcThreadPool)``` see the unit tests)
 
-The current implementation gets Prequel to generate a ```Seq``` of results on a background thread then fires these out via an RxJava Observable.   
 
 Its very expensive to get data into a ```ResultSet``` so normal processing should not abort reading as folks should only query for what they need. Likewise running an insert/update/delete then cancelling before you get confirmation of the effect isn't normal processing. Instead simply perform any writes on a future using the jdbcThreadPool with ```ExecutionContext.fromExecutor(database.jdbcThreadPool)```.
 

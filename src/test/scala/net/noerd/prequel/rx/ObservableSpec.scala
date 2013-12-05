@@ -1,7 +1,7 @@
 package net.noerd.prequel.rx
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.language.postfixOps
+import scala.concurrent.duration._
 
 import scala.collection.mutable.ListBuffer
 import java.util.concurrent.CountDownLatch
@@ -14,6 +14,8 @@ import net.noerd.prequel.ResultSetRowImplicits._
 import net.noerd.prequel.SQLFormatterImplicits._
 import net.noerd.prequel.TestDatabase
 import net.noerd.prequel.rx.DatabaseConfigRx._
+
+import scala.concurrent.{ ExecutionContext, Future, Await }
 
 import _root_.rx.lang.scala.{ Observer, Observable, Scheduler, Subscription }
 
@@ -99,6 +101,21 @@ class ObservableSpec extends FunSpec with ShouldMatchers with BeforeAndAfterEach
 
       result should equal(List((242, "test1")))
 
+    }
+
+    it("should let you do updates on the background threads easily") {
+      implicit val ec = ExecutionContext.fromExecutor(database.jdbcThreadPool)
+      var foregroundThreadName = Thread.currentThread().getName()
+      var backgroundThreadName: String = null
+
+      val future = Future {
+        backgroundThreadName = Thread.currentThread().getName()
+        database.transaction(tx => tx.execute("delete from observersspectable where name = ?", "test1"))
+        database.transaction(tx => tx.selectInt("select count(*) from observersspectable"))
+      }
+
+      Await.result(future, 1 seconds) should equal(2)
+      backgroundThreadName should not equal (foregroundThreadName)
     }
 
     it("should not process any work on the thread which creates the observable") {

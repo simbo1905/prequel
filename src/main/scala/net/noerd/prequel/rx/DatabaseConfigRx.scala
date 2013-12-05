@@ -8,8 +8,8 @@ import scala.concurrent.{ ExecutionContext, Future }
 import java.util.concurrent.Executors
 
 class DatabaseConfigObservable(val database: DatabaseConfig) {
-  val threadPool = Executors.newFixedThreadPool(database.poolConfig.maxActive)
-  val jdbcSchedular = Schedulers.executor(threadPool)
+  val jdbcThreadPool = Executors.newFixedThreadPool(database.poolConfig.maxActive)
+  val jdbcSchedular = Schedulers.executor(jdbcThreadPool)
 
   def observable[T](sql: String, params: Formattable*)(block: ResultSetRow => T) = {
     @volatile var subscribed = true
@@ -29,7 +29,7 @@ class DatabaseConfigObservable(val database: DatabaseConfig) {
   }
 
   def shutdown() {
-    threadPool.shutdown()
+    jdbcThreadPool.shutdown()
   }
 }
 

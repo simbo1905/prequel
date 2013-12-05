@@ -1,7 +1,7 @@
 Prequel - Rx Query Extension
 ============================
 
-This is a version of Prequel 0.3.9 + rxjava-scala 0.15.1 which extends Prequel with a pimp package "net.noerd.preqeuel.rx" to run the jdbc work on a background threadpool. Access to the results is through an asynchronous rx.lang.scala.Observable from [RxJava](https://github.com/Netflix/RxJava/wiki)
+This is a version of ```Prequel 0.3.9``` + ```rxjava-scala 0.15.1``` which extends Prequel with a pimp package ```net.noerd.preqeuel.rx``` to run the jdbc work on a background threadpool. Access to the results is through an asynchronous ```rx.lang.scala.Observable``` from [RxJava](https://github.com/Netflix/RxJava/wiki)
 
 Given a vanilla Prequel database setup: 
 
@@ -39,18 +39,16 @@ Don't forget to shutdown the background threadpool when you are done with:
   database.shutdown()
 ```
 
-If you want an Iteratee rather than an Observable take a look at [Rxplay Making Iteratees And Observables Play Nice](http://bryangilbert.com/code/2013/10/22/rxPlay-making-iteratees-and-observables-play-nice/)
+If you want an ```Iteratee``` rather than an ```Observable``` take a look at [Rxplay Making Iteratees And Observables Play Nice](http://bryangilbert.com/code/2013/10/22/rxPlay-making-iteratees-and-observables-play-nice/)
 
 ### Not supported
 
  * Truly canceling the subscription (rather than ignoring the rest of the results which were loaded into the Seq) 
- * Observable insert/update/delete (its trivial to push updates on your own future which uses ExecutionContext.fromExecutor(database.jdbcThreadPool) see unit tests)
+ * Observable insert/update/delete (its trivial to push updates on your own future which uses ```ExecutionContext.fromExecutor(database.jdbcThreadPool)``` see the unit tests)
 
-The current implementation gets Prequel to generate a Seq of results on a background thread then fires these out via an RxJava Observable.   
+The current implementation gets Prequel to generate a ```Seq``` of results on a background thread then fires these out via an RxJava Observable.   
 
-Its very expensive to get data into a ResultSet so normal processing should not abort reading as folks should only query for what they need. Likewise running an insert/update/delete then cancelling before you get confirmation of the effect isn't normal processing. Do writes on a future running on the database.jdbcThreadPool threadpool (i.e. wrap it in your own ExecuctionContext)
-
- so making the number of results returned cancellable subscription is not normal processing.
+Its very expensive to get data into a ```ResultSet``` so normal processing should not abort reading as folks should only query for what they need. Likewise running an insert/update/delete then cancelling before you get confirmation of the effect isn't normal processing. Instead simply perform writes on a future running on the ```ExecutionContext.fromExecutor(database.jdbcThreadPool)```.
 
 The current implementation is a pimp wrapper so light touch to the main Prequel code. The recursive subscriptions are the optional lectures in [Principles of Reactive Programming](https://class.coursera.org/reactive-001/assignment/index) and will blow apart the Prequel synchronous try/catch error handling model (its very possible, but do you really need to cancel the work under normal processing?). 
 

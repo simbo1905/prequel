@@ -31,7 +31,7 @@ You can run jdbc queries on a background threadpool and see the output via an Ob
   })
 ```
 
-The background threads are a threadpool within DatabaseConfigObservable sized to match the DatabaseConfig db connection pool max size. This is exposed as database.jdbcSchedular or database.jdbcThreadPool 
+The background threads are a threadpool exposed as ```database.jdbcThreadPool``` which is sized to match the DatabaseConfig db connection pool max size. 
 
 Don't forget to shutdown the background threadpool when you are done with: 
 

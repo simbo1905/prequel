@@ -29,7 +29,7 @@ You can run jdbc queries on a background threadpool and see the output via an Ob
   
   val subscription = observable.subscribe( (b: Bicycle) => {
     // standard rx onNext callback running on a dedicated threadpool
-    // ride your bike on a future or send it to an actor to run it on another set of threads
+    println(s"$b on a background thread")
   })
 ```
 

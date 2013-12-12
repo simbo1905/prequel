@@ -116,6 +116,7 @@ class ObservableSpec extends FunSpec with ShouldMatchers with BeforeAndAfterEach
 
       Await.result(future, 1 seconds) should equal(2)
       backgroundThreadName should not equal (foregroundThreadName)
+      //println(s"backgroundThreadName: $backgroundThreadName, foregroundThreadName: $foregroundThreadName")
     }
 
     it("should not process any work on the thread which creates the observable") {

@@ -5,10 +5,17 @@ import rx.lang.scala.subscriptions._
 import rx.lang.scala.concurrency._
 import net.noerd.prequel._
 import scala.concurrent.{ ExecutionContext, Future }
-import java.util.concurrent.Executors
+import java.util.concurrent.{ Executors, ThreadFactory }
+import java.util.concurrent.atomic.AtomicInteger
 
 class DatabaseConfigObservable(val database: DatabaseConfig) {
-  val jdbcThreadPool = Executors.newFixedThreadPool(database.poolConfig.maxActive)
+  val jdbcThreadFactory = new ThreadFactory {
+    var n = new AtomicInteger
+    override def newThread(r: Runnable) = {
+      new Thread(r, s"jdbc-pool-thread-${n.getAndIncrement}")
+    }
+  }
+  val jdbcThreadPool = Executors.newFixedThreadPool(database.poolConfig.maxActive, jdbcThreadFactory)
   val jdbcSchedular = Schedulers.executor(jdbcThreadPool)
 
   def observable[T](sql: String, params: Formattable*)(block: ResultSetRow => T) = {

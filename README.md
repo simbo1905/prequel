@@ -21,6 +21,8 @@ val database = DatabaseConfig(
 You can run jdbc queries on a background threadpool and see the output via an Observable:  
 
 ```scala
+  import net.noerd.prequel.rx.DatabaseConfigRx._ 
+
   val observable: Observable[Bicycle] = database.observable("select id, brand, release_date from bicycles", r => {
     Bicycle( r, r, r ) 
   })
@@ -33,7 +35,7 @@ You can run jdbc queries on a background threadpool and see the output via an Ob
 
 The background threads are a threadpool exposed as ```database.jdbcThreadPool``` which is sized to match the DatabaseConfig db connection pool max size. 
 
-Perform any writes on a future using the jdbcThreadPool with ```ExecutionContext.fromExecutor(database.jdbcThreadPool)```.
+Perform any writes on a future using the jdbcThreadPool to ensure that you dont block your main application threads: 
 
 ```scala
   implicit val ec = ExecutionContext.fromExecutor(database.jdbcThreadPool)
